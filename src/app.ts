@@ -299,12 +299,13 @@ class Drawing extends DrawingCommon {
         }
         if (time <= this.i1EndTime && time >= this.i1StartTime) { //First interval (Ball Intro)
             var t = (time - this.i1StartTime) / this.iLengthTime;
-            this.ballMesh.position.x = this.ballStartPos.x + (this.ballEndPos.x - this.ballStartPos.x) * t;
-            this.ballMesh.position.y = this.ballStartPos.y + (this.ballEndPos.y - this.ballStartPos.y) * t;
-            this.ballMesh.position.z = this.ballStartPos.z + (this.ballEndPos.z - this.ballStartPos.z) * t;
+            var te = easeInOutExpo(t);
+            this.ballMesh.position.x = this.ballStartPos.x + (this.ballEndPos.x - this.ballStartPos.x) * te;
+            this.ballMesh.position.y = this.ballStartPos.y + (this.ballEndPos.y - this.ballStartPos.y) * te;
+            this.ballMesh.position.z = this.ballStartPos.z + (this.ballEndPos.z - this.ballStartPos.z) * te;
 
-            if (t > 0.5)
-            this.pantherHeadMesh.rotation.z = this.headStartRot.z + (this.headEndRot.z - this.headStartRot.z) * (t - 0.5) * 2;
+            if (te > 0.5)
+            this.pantherHeadMesh.rotation.z = this.headStartRot.z + (this.headEndRot.z - this.headStartRot.z) * (te - 0.5) * 2;
 
             if (t > 0.2) {
                 this.camera.position.x = this.cameraStartPos.x + (this.cameraEndPos.x - this.cameraStartPos.x) * (t - 0.2) * (1 / 0.8);
@@ -318,7 +319,7 @@ class Drawing extends DrawingCommon {
         } 
         if (time <= this.i2EndTime && time >= this.i1EndTime) { // Second Interval (Head Turn)
             var t = (time - this.i1EndTime) / this.iLengthTime;
-
+            var te = easeInOutExpo(t);
             if (t < 0.5) {
                 this.camera.position.x = this.cameraEndPos.x + (this.cameraEndPos2.x - this.cameraEndPos.x) * t * 2;
                 this.camera.position.y = this.cameraEndPos.y + (this.cameraEndPos2.y - this.cameraEndPos.y) * t * 2;
@@ -326,22 +327,23 @@ class Drawing extends DrawingCommon {
                 this.camera.lookAt(new Vector3());
             }
 
-            if (t <= 0.2 && t > 0.1)
-            this.pantherHeadMesh.rotation.z = this.headEndRot.z + (this.headEndRot2.z - this.headEndRot.z) * (t - 0.1) * (1 / 0.1);
+            if (te <= 0.2 && te > 0.1)
+            this.pantherHeadMesh.rotation.z = this.headEndRot.z + (this.headEndRot2.z - this.headEndRot.z) * (te - 0.1) * (1 / 0.1);
 
-            if (t > 0.3 && t <= 0.5)
-            this.pantherHeadMesh.rotation.y = this.headEndRot2.y + (this.headEndRot3.y - this.headEndRot2.y) * (t - 0.3) * (1 / 0.2);
+            if (te > 0.3 && te <= 0.5)
+            this.pantherHeadMesh.rotation.y = this.headEndRot2.y + (this.headEndRot3.y - this.headEndRot2.y) * (te - 0.3) * (1 / 0.2);
 
-            if (t > 0.5 && t <= 0.7)
-            this.pantherHeadMesh.rotation.y = this.headEndRot3.y + (-this.headEndRot3.y - this.headEndRot3.y) * (t - 0.5) * (1 / 0.2);
+            if (te > 0.7 && te <= 0.9)
+            this.pantherHeadMesh.rotation.y = this.headEndRot3.y + (-this.headEndRot3.y - this.headEndRot3.y) * (te - 0.7) * (1 / 0.2);
             
-            if (t > 0.8)
-            this.pantherHeadMesh.quaternion.slerpQuaternions(new THREE.Quaternion().setFromAxisAngle(this.y, -Math.PI / 4), new THREE.Quaternion().setFromAxisAngle(this.y, 0), (t - 0.8) * (1 / 0.2))
+            if (t > 0.9)
+            this.pantherHeadMesh.quaternion.slerpQuaternions(new THREE.Quaternion().setFromAxisAngle(this.y, this.pantherHeadMesh.rotation.y), new THREE.Quaternion().setFromAxisAngle(this.y, 0), (t - 0.9) * (1 / 0.1))
 
             return;
         } 
         if (time <= this.i3EndTime && time >= this.i2EndTime) { // Third Interval (Ball Kick)
             var t = (time - this.i2EndTime) / this.iLengthTime;
+            var te = easeInOutExpo(t);
             if (t < 0.5) {
                 this.camera.position.x = this.cameraEndPos2.x + (8 - this.cameraEndPos2.x) * t * 2;
                 this.camera.position.y = this.cameraEndPos2.y + (0 - this.cameraEndPos2.y) * t * 2;
@@ -351,10 +353,10 @@ class Drawing extends DrawingCommon {
                 this.pantherHeadMesh.rotation.z = this.headStartRot.z + (this.headEndRot.z - this.headStartRot.z) * (t) * 2;
             }
             if (t > 0.5 && t < 0.6) {
-                this.pantherRL.rotation.z = this.legStartRot.z + (this.legEndRot.z - this.legStartRot.z) * Math.pow((t - 0.5) * (1 / 0.1), 4)
+                this.pantherRL.rotation.z = this.legStartRot.z + (this.legEndRot.z - this.legStartRot.z) * Math.pow((t - 0.5) * (1 / 0.1), 5)
             }
             if (t > 0.6 && t < 0.8) {
-                this.pantherRL.rotation.z = this.legEndRot.z + (this.legStartRot.z - this.legEndRot.z) * Math.pow((t - 0.6) * (1 / 0.2), 4)
+                this.pantherRL.rotation.z = this.legEndRot.z + (this.legStartRot.z - this.legEndRot.z) * (t - 0.6) * (1 / 0.2);
 
                 this.ballMesh.position.x = this.ballEndPos.x + (this.ballStartPos.x - this.ballEndPos.x) * (t - 0.6) * (1 / 0.2);
                 this.ballMesh.position.y = this.ballEndPos.y + (this.ballStartPos.y - this.ballEndPos.y) * (t - 0.6) * (1 / 0.2);
@@ -370,6 +372,7 @@ class Drawing extends DrawingCommon {
         }
         if (time <= this.i4EndTime && time >= this.i3EndTime) { // Fourth Interval (Ball Fall)
             var t = (time - this.i3EndTime) / this.iLengthTime;
+            var te = easeInOutExpo(t);
             if (t < 0.2)
             this.pantherHeadMesh.rotation.z = this.headEndRot.z + (this.headEndRot2.z - this.headEndRot.z) * (t) * 5;
             if (t > 0.4 && t < 0.6) {
@@ -569,5 +572,13 @@ function createTail() : THREE.Group {
     return tailGroup;
 }
 
+function easeInOutExpo(x: number): number {
+    return x === 0
+      ? 0
+      : x === 1
+      ? 1
+      : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2
+      : (2 - Math.pow(2, -20 * x + 10)) / 2;
+    }
 
 exec()
