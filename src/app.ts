@@ -14,10 +14,16 @@ class Drawing extends DrawingCommon {
         this.ballMesh = this.scene.ballMesh;
         // @ts-ignore
         this.pantherHeadMesh = this.scene.pantherHeadMesh;
+        // @ts-ignore
+        this.pantherRL = this.scene.pantherRL;
+        // @ts-ignore
+        this.pantherEyes = this.scene.pantherEyes;
     }
 
     ballMesh: THREE.Mesh;
     pantherHeadMesh: THREE.Mesh;
+    pantherRL: THREE.Mesh;
+    pantherEyes: THREE.Mesh;
     /*
 	Set up the scene during class construction
 	*/
@@ -43,12 +49,18 @@ class Drawing extends DrawingCommon {
 
         // Eyes
         var eyeR = createEye();
-        eyeR.position.set(0.58, 0.13, -0.3);
-        headRoot.add( eyeR );
+        eyeR.position.set(0, 0, -0.3);
 
         var eyeL = createEye();
-        eyeL.position.set(0.58, 0.13, 0.3);
-        headRoot.add(eyeL);
+        eyeL.position.set(0, 0, 0.3);
+
+        var eyes = new THREE.Group();
+        eyes.add(eyeL)
+        eyes.add(eyeR)
+
+        eyes.position.set(0.58, 0.13, 0);
+
+        headRoot.add(eyes);
 
         // Ear L
         geometry = new THREE.ConeGeometry(2, 2, 5, 10);
@@ -192,11 +204,25 @@ class Drawing extends DrawingCommon {
         this.scene.ballMesh = mesh;
         // @ts-ignore
         this.scene.pantherHeadMesh = headRoot;
+        // @ts-ignore
+        this.scene.pantherRL = legFR;
+        // @ts-ignore
+        this.scene.pantherEyes = eyes;
 
         const dirLight1 = new THREE.DirectionalLight( 0xffffff );
 		dirLight1.position.set( 1, 1, 1 );
 		this.scene.add( dirLight1 );
         
+        var geometry : THREE.BufferGeometry = new THREE.BoxGeometry(1000, 1000, 1);
+        var material = new THREE.MeshPhongMaterial( { color: 0xc19a6b, flatShading: true } );
+        var mesh = new THREE.Mesh( geometry, material );
+
+        mesh.position.set(0, -3, 0);
+        mesh.rotateY(-Math.PI / 2);
+        mesh.rotateX(-Math.PI / 2);
+
+        this.scene.add(mesh);
+
         this.scene.add( objectRoot );
         this.camera.lookAt(new THREE.Vector3())
     }
@@ -205,16 +231,28 @@ class Drawing extends DrawingCommon {
     animspeed = ANIMSPEED;
     animStart = 0;
     animEnd = 0;
-    animLengthTime = 10000;
+    animLengthTime = 20000;
     ballStartPos = new THREE.Vector3(8, -2, 0);
-    ballEndPos = new THREE.Vector3(3.8, -2, 0);
+    ballEndPos = new THREE.Vector3(2.5, -2, 0);
+    ballEndPos2 = new THREE.Vector3(8, -2, 0);
     headStartRot = new THREE.Vector3(0, 0, 0);
-    headEndRot = new THREE.Vector3(0, 0, -Math.PI / 4)
+    headEndRot = new THREE.Vector3(0, 0, -Math.PI / 6)
+    headEndRot2 = new THREE.Vector3(0, 0, 0);
+    headEndRot3 = new THREE.Vector3(0, Math.PI / 4, 0);
     cameraStartPos = this.camera.position;
-    cameraEndPos = new THREE.Vector3(8, 1, 0);
+    cameraEndPos = new THREE.Vector3(9, -2, 0);
+    cameraEndPos2 = new THREE.Vector3(5, 0.5, 0);
+
+    legStartRot = new THREE.Vector3(0, 0, 0)
+    legEndRot = new THREE.Vector3(0, 0, Math.PI / 3)
     i1StartTime = 0;
     i1EndTime = 0;
-    i1LengthTime = 5000;
+    i2EndTime = 0;
+    i3EndTime = 0;
+    i4EndTime = 0;
+    iLengthTime = 5000;
+
+    y = new THREE.Vector3(0,1,0)
 
 	/*
 	Update the scene during requestAnimationFrame callback before rendering
@@ -225,45 +263,112 @@ class Drawing extends DrawingCommon {
             this.animStart = time;
             this.animEnd = this.animStart + this.animLengthTime
             this.i1StartTime = time
-            this.i1EndTime = time + this.i1LengthTime
+            this.i1EndTime = time + this.iLengthTime
+            this.i2EndTime = this.i1EndTime + this.iLengthTime;
+            this.i3EndTime = this.i2EndTime + this.iLengthTime;
+            this.i4EndTime = this.i3EndTime + this.iLengthTime;
         }
-        if (time > this.animEnd) {
+        if (time > this.animEnd) { //End the animation
             return;
         }
-        if (time <= this.i1EndTime && time >= this.i1StartTime) { //First interval
-            var t = (time - this.i1StartTime) / this.i1LengthTime;
+        if (time <= this.i1EndTime && time >= this.i1StartTime) { //First interval (Ball Intro)
+            var t = (time - this.i1StartTime) / this.iLengthTime;
             this.ballMesh.position.x = this.ballStartPos.x + (this.ballEndPos.x - this.ballStartPos.x) * t;
             this.ballMesh.position.y = this.ballStartPos.y + (this.ballEndPos.y - this.ballStartPos.y) * t;
             this.ballMesh.position.z = this.ballStartPos.z + (this.ballEndPos.z - this.ballStartPos.z) * t;
 
-            this.pantherHeadMesh.rotation.z = this.headStartRot.z + (this.headEndRot.z - this.headStartRot.z) * t;
+            if (t > 0.5)
+            this.pantherHeadMesh.rotation.z = this.headStartRot.z + (this.headEndRot.z - this.headStartRot.z) * (t - 0.5) * 2;
 
-            this.camera.position.x = this.cameraStartPos.x + (this.cameraEndPos.x - this.cameraStartPos.x) * t;
-            this.camera.position.y = this.cameraStartPos.y + (this.cameraEndPos.y - this.cameraStartPos.y) * t;
-            this.camera.position.z = this.cameraStartPos.z + (this.cameraEndPos.z - this.cameraStartPos.z) * t;
+            if (t > 0.2) {
+                this.camera.position.x = this.cameraStartPos.x + (this.cameraEndPos.x - this.cameraStartPos.x) * (t - 0.2) * (1 / 0.8);
+                this.camera.position.y = this.cameraStartPos.y + (this.cameraEndPos.y - this.cameraStartPos.y) * (t - 0.2) * (1 / 0.8);
+                this.camera.position.z = this.cameraStartPos.z + (this.cameraEndPos.z - this.cameraStartPos.z) * (t - 0.2) * (1 / 0.8);
+        
+                this.camera.lookAt(new Vector3());
+            }
+
+            return;
+        } 
+        if (time <= this.i2EndTime && time >= this.i1EndTime) { // Second Interval (Head Turn)
+            var t = (time - this.i1EndTime) / this.iLengthTime;
+
+            if (t < 0.5) {
+                this.camera.position.x = this.cameraEndPos.x + (this.cameraEndPos2.x - this.cameraEndPos.x) * t * 2;
+                this.camera.position.y = this.cameraEndPos.y + (this.cameraEndPos2.y - this.cameraEndPos.y) * t * 2;
+                this.camera.position.z = this.cameraEndPos.z + (this.cameraEndPos2.z - this.cameraEndPos.z) * t * 2;
+                this.camera.lookAt(new Vector3());
+            }
+
+            if (t <= 0.2 && t > 0.1)
+            this.pantherHeadMesh.rotation.z = this.headEndRot.z + (this.headEndRot2.z - this.headEndRot.z) * (t - 0.1) * (1 / 0.1);
+
+            if (t > 0.3 && t <= 0.5)
+            this.pantherHeadMesh.rotation.y = this.headEndRot2.y + (this.headEndRot3.y - this.headEndRot2.y) * (t - 0.3) * (1 / 0.2);
+
+            if (t > 0.5 && t <= 0.7)
+            this.pantherHeadMesh.rotation.y = this.headEndRot3.y + (-this.headEndRot3.y - this.headEndRot3.y) * (t - 0.5) * (1 / 0.2);
+            
+            if (t > 0.8)
+            this.pantherHeadMesh.quaternion.slerpQuaternions(new THREE.Quaternion().setFromAxisAngle(this.y, -Math.PI / 4), new THREE.Quaternion().setFromAxisAngle(this.y, 0), (t - 0.8) * (1 / 0.2))
+
+            return;
+        } 
+        if (time <= this.i3EndTime && time >= this.i2EndTime) { // Third Interval (Ball Kick)
+            var t = (time - this.i2EndTime) / this.iLengthTime;
+            if (t < 0.5) {
+                this.camera.position.x = this.cameraEndPos2.x + (8 - this.cameraEndPos2.x) * t * 2;
+                this.camera.position.y = this.cameraEndPos2.y + (0 - this.cameraEndPos2.y) * t * 2;
+                this.camera.position.z = this.cameraEndPos2.z + (-2 - this.cameraEndPos2.z) * t * 2;
+                this.camera.lookAt(new Vector3());
+
+                this.pantherHeadMesh.rotation.z = this.headStartRot.z + (this.headEndRot.z - this.headStartRot.z) * (t) * 2;
+            }
+            if (t > 0.5 && t < 0.6) {
+                this.pantherRL.rotation.z = this.legStartRot.z + (this.legEndRot.z - this.legStartRot.z) * Math.pow((t - 0.5) * (1 / 0.1), 4)
+            }
+            if (t > 0.6 && t < 0.8) {
+                this.pantherRL.rotation.z = this.legEndRot.z + (this.legStartRot.z - this.legEndRot.z) * Math.pow((t - 0.6) * (1 / 0.2), 4)
+
+                this.ballMesh.position.x = this.ballEndPos.x + (this.ballStartPos.x - this.ballEndPos.x) * (t - 0.6) * (1 / 0.2);
+                this.ballMesh.position.y = this.ballEndPos.y + (this.ballStartPos.y - this.ballEndPos.y) * (t - 0.6) * (1 / 0.2);
+                this.ballMesh.position.z = this.ballEndPos.z + (this.ballStartPos.z - this.ballEndPos.z) * (t - 0.6) * (1 / 0.2);            
+            }
+            if (t > 0.8) {
+                this.camera.position.x = 8 + (this.cameraEndPos2.x - 6) * (t - 0.8) * (1 / 0.2);
+                this.camera.position.y = 0 + (this.cameraEndPos2.y) * (t - 0.8) * (1 / 0.2);
+                this.camera.position.z = -2 + (this.cameraEndPos2.z + 2) * (t - 0.8) * (1 / 0.2);
+                this.camera.lookAt(new Vector3());
+            }
+            return;
+        }
+        if (time <= this.i4EndTime && time >= this.i3EndTime) { // Fourth Interval (Ball Fall)
+            var t = (time - this.i3EndTime) / this.iLengthTime;
+            console.log("Interval 4")
+            if (t < 0.2)
+            this.pantherHeadMesh.rotation.z = this.headEndRot.z + (this.headEndRot2.z - this.headEndRot.z) * (t) * 5;
+            if (t > 0.4 && t < 0.6) {
+                this.pantherHeadMesh.rotation.z = this.headEndRot2.z + ((Math.PI / 4) - this.headEndRot2.z) * (t - 0.4) * (1 / 0.2);
+            }
+            if (t > 0.7 && t < 0.9)
+            this.pantherHeadMesh.rotation.z = (Math.PI / 4) + (this.headEndRot2.z - (Math.PI / 4)) * (t - 0.7) * (1 / 0.2);
+            if (t > 0.9 && t < 0.95) {
+                this.ballMesh.position.x = 2 + (2 - 2) * (t - 0.9) * (1 / 0.05);
+                this.ballMesh.position.y = 8 + (1.4 - 8) * (t - 0.9) * (1 / 0.05);
+                this.ballMesh.position.z = 0 + (0 - 0) * (t - 0.9) * (1 / 0.05);
+            }
+            if (t > 0.93 && t < 0.95) {
+                this.pantherHeadMesh.scale.y = 1 + (0.7 - 1) * (t - 0.93) * (1/ 0.02);
+                this.pantherEyes.scale.x = 1 + (1.2 - 1) * (t - 0.93) * (1/ 0.02);
+                this.pantherEyes.scale.y = 1 + (1.2 - 1) * (t - 0.93) * (1/ 0.02);
+                this.pantherEyes.scale.z = 1 + (1.2 - 1) * (t - 0.93) * (1/ 0.02);
+
+
+            }
+            if (t > 0.95)
+            this.ballMesh.position.y = 1.4 + (3 - 1.4) * (t - 0.95) * (1 / 0.05);
+        }
     
-            this.camera.lookAt(new Vector3());
-            return;
-        } 
-        if (time > this.i1EndTime) { // Transition block 
-            this.i1StartTime = time;
-            this.i1EndTime = this.i1StartTime + this.i1LengthTime;
-            var temp = this.ballEndPos;
-            this.ballEndPos = this.ballStartPos;
-            this.ballStartPos = temp;
-            this.headEndRot = this.headStartRot;
-            this.headStartRot = this.pantherHeadMesh.rotation.toVector3();
-        }
-        if (time <= this.i1EndTime && time >= this.i1StartTime) { // Second Interval
-            var t = (time - this.i1EndTime) / this.i1LengthTime;
-            this.ballMesh.position.x = this.ballStartPos.x + (this.ballEndPos.x - this.ballStartPos.x) * t;
-            this.ballMesh.position.y = this.ballStartPos.y + (this.ballEndPos.y - this.ballStartPos.y) * t;
-            this.ballMesh.position.z = this.ballStartPos.z + (this.ballEndPos.z - this.ballStartPos.z) * t;
-
-            this.pantherHeadMesh.rotation.z = this.headStartRot.z + (this.headEndRot.z - this.headStartRot.z) * t;
-
-            return;
-        } 
         
         var t = (time - this.animStart) / this.animLengthTime;
     }
