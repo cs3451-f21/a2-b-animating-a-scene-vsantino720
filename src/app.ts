@@ -198,6 +198,9 @@ class Drawing extends DrawingCommon {
         var material = new THREE.MeshPhongMaterial( { color: 0xFF0000, flatShading: true } );
         var mesh = new THREE.Mesh( geometry, material );
 
+        var ballLight = new THREE.PointLight(new THREE.Color(0xC54E57))
+        mesh.add(ballLight);
+
         this.scene.add(mesh);
 
         // @ts-ignore
@@ -208,13 +211,9 @@ class Drawing extends DrawingCommon {
         this.scene.pantherRL = legFR;
         // @ts-ignore
         this.scene.pantherEyes = eyes;
-
-        const dirLight1 = new THREE.DirectionalLight( 0xffffff );
-		dirLight1.position.set( 1, 1, 1 );
-		this.scene.add( dirLight1 );
         
         var geometry : THREE.BufferGeometry = new THREE.BoxGeometry(1000, 1000, 1);
-        var material = new THREE.MeshPhongMaterial( { color: 0xc19a6b, flatShading: true } );
+        var material = new THREE.MeshPhongMaterial( { color: 0x3d332c, flatShading: true } );
         var mesh = new THREE.Mesh( geometry, material );
 
         mesh.position.set(0, -3, 0);
@@ -223,6 +222,33 @@ class Drawing extends DrawingCommon {
 
         this.scene.add(mesh);
 
+        var tree = createTree();
+        tree.position.set(-10, 0, 5)
+        this.scene.add(tree)
+
+        tree = createTree();
+        tree.position.set(-7, 0, -7)
+        this.scene.add(tree)
+
+        tree = createTree();
+        tree.position.set(-5, 0, 10)
+        this.scene.add(tree)       
+
+        tree = createTree();
+        tree.position.set(-4, 0, -12)
+        this.scene.add(tree)
+
+        // Moonlight
+        geometry = new THREE.SphereGeometry( 20, 100, 100 );
+        material = new THREE.MeshPhongMaterial( { color: 0xFFFFFF, flatShading: true } );
+        mesh = new THREE.Mesh( geometry, material );
+        var moonLight = new THREE.PointLight(new THREE.Color(0xFFFFFF));
+        mesh.add(moonLight);
+        mesh.position.set(-700, 500, -120);
+
+        this.scene.add(mesh);
+
+        this.scene.background = new THREE.Color(0x040409)
         this.scene.add( objectRoot );
         this.camera.lookAt(new THREE.Vector3())
     }
@@ -232,7 +258,7 @@ class Drawing extends DrawingCommon {
     animStart = 0;
     animEnd = 0;
     animLengthTime = 20000;
-    ballStartPos = new THREE.Vector3(8, -2, 0);
+    ballStartPos = new THREE.Vector3(20, -2, 0);
     ballEndPos = new THREE.Vector3(2.5, -2, 0);
     ballEndPos2 = new THREE.Vector3(8, -2, 0);
     headStartRot = new THREE.Vector3(0, 0, 0);
@@ -344,7 +370,6 @@ class Drawing extends DrawingCommon {
         }
         if (time <= this.i4EndTime && time >= this.i3EndTime) { // Fourth Interval (Ball Fall)
             var t = (time - this.i3EndTime) / this.iLengthTime;
-            console.log("Interval 4")
             if (t < 0.2)
             this.pantherHeadMesh.rotation.z = this.headEndRot.z + (this.headEndRot2.z - this.headEndRot.z) * (t) * 5;
             if (t > 0.4 && t < 0.6) {
@@ -396,7 +421,22 @@ function exec() {
     myDrawing = new Drawing(div);
 }
 
+function createTree() : THREE.Group {
+    var treeRoot = new THREE.Group();
+    var geometry: THREE.BufferGeometry = new THREE.CylinderGeometry( 1.3, 1.1, 10, 15, 30 );
+    var material = new THREE.MeshPhongMaterial( { color: 0x533118, flatShading: true } );
+    var mesh = new THREE.Mesh( geometry, material );
+    treeRoot.add(mesh);
 
+    geometry = new THREE.SphereGeometry( 3, 30, 30 );
+    material = new THREE.MeshPhongMaterial( { color: 0x228B22, flatShading: true } );
+    mesh = new THREE.Mesh( geometry, material ); 
+
+    mesh.position.set(0, 7, 0);
+    treeRoot.add(mesh);
+
+    return treeRoot
+}
 function createSnout() : THREE.Group {
     var snoutRoot = new THREE.Group();
     var geometry: THREE.BufferGeometry = new THREE.CylinderGeometry( 0.35, 0.65, 1, 15, 30 );
